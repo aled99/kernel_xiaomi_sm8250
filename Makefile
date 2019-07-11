@@ -684,9 +684,28 @@ KBUILD_CFLAGS   += -Os
 KBUILD_AFLAGS   += -Os
 KBUILD_LDFLAGS  += -Os
 else ifeq ($(cc-name),clang)
-KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse -mtune=cortex-a77 -mcpu=cortex-a77 -fno-trapping-math -fno-math-errno -mllvm -polly -mllvm -polly-position=early -mllvm -polly-optimizer=isl -mllvm -polly-code-generation=full -mllvm -polly-vectorizer=stripmine -mllvm -polly-enable-delicm -mllvm -polly-enable-simplify -mllvm -polly-run-inliner --cuda-path=/dev/null -mfpu=crypto-neon-fp-armv8 
-KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse -fno-trapping-math -fno-math-errno -mllvm -polly -mllvm -polly-position=early -mllvm -polly-optimizer=isl -mllvm -polly-code-generation=full -mllvm -polly-vectorizer=stripmine -mllvm -polly-enable-delicm -mllvm -polly-enable-simplify -mllvm -polly-run-inliner --cuda-path=/dev/null
-KBUILD_LDFLAGS  += -O3,-Bsymbolic-functions,--as-needed -mllvm -polly -mllvm -polly-position=early -mllvm -polly-optimizer=isl -mllvm -polly-code-generation=full -mllvm -polly
+ifdef CONFIG_POLLY_CLANG
+POLLY_FLAGS	+= -mllvm -polly \
+		   -mllvm -polly-ast-use-context \
+		   -mllvm -polly-invariant-load-hoisting \
+		   -mllvm -polly-loopfusion-greedy=1 \
+		   -mllvm -polly-postopts=1 \
+		   -mllvm -polly-reschedule=1 \
+		   -mllvm -polly-run-inliner \
+		   -mllvm -polly-vectorizer=stripmine
+# Polly may optimise loops with dead paths beyound what the linker
+# can understand. This may negate the effect of the linker's DCE
+# so we tell Polly to perfom proven DCE on the loops it optimises
+# in order to preserve the overall effect of the linker's DCE.
+ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION
+POLLY_FLAGS	+= -mllvm -polly-run-dce
+endif
+OPT_FLAGS	+= $(POLLY_FLAGS)
+KBUILD_LDFLAGS	+= $(POLLY_FLAGS)
+endif
+KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse -mtune=cortex-a77 -mcpu=cortex-a77 -fno-trapping-math -fno-math-errno --cuda-path=/dev/null -mfpu=crypto-neon-fp-armv8 
+KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse -fno-trapping-math -fno-math-errno --cuda-path=/dev/null
+KBUILD_LDFLAGS  += -O3,-Bsymbolic-functions,--as-needed
 else
 KBUILD_CFLAGS   += -O2
 KBUILD_AFLAGS   += -O2
@@ -694,8 +713,9 @@ KBUILD_LDFLAGS  += -O2
 
 ifdef CONFIG_INLINE_OPTIMIZATION
 ifdef CONFIG_CC_IS_CLANG
-KBUILD_CFLAGS	+= -mllvm -inline-threshold=600
-KBUILD_CFLAGS	+= -mllvm -inlinehint-threshold=750
+KBUILD_CFLAGS	+= -mllvm -inline-threshold=2000
+KBUILD_CFLAGS	+= -mllvm -inlinehint-threshold=3000
+KBUILD_CFLAGS   += -mllvm -unroll-threshold=1200
 else ifdef CONFIG_CC_IS_GCC
 KBUILD_CFLAGS	+= --param max-inline-insns-single=600
 KBUILD_CFLAGS	+= --param max-inline-insns-auto=750
