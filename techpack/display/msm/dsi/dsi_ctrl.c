@@ -1392,6 +1392,10 @@ static int dsi_message_tx(struct dsi_ctrl *dsi_ctrl,
 		 (msg->flags & MIPI_DSI_MSG_LASTCOMMAND) != 0);
 
 	if (*flags & DSI_CTRL_CMD_NON_EMBEDDED_MODE) {
+	DSI_CTRL_DEBUG(dsi_ctrl, "cmd tx type=%02x cmd=%02x len=%d last=%d\n",
+		 msg->type, msg->tx_len ? *((u8 *)msg->tx_buf) : 0, msg->tx_len,
+		 (msg->flags & MIPI_DSI_MSG_LASTCOMMAND) != 0);
+
 		cmd_mem.offset = dsi_ctrl->cmd_buffer_iova;
 		cmd_mem.en_broadcast = (*flags & DSI_CTRL_CMD_BROADCAST) ?
 			true : false;
@@ -1420,7 +1424,23 @@ static int dsi_message_tx(struct dsi_ctrl *dsi_ctrl,
 
 	length = ALIGN(packet.size, 4);
 
-	if ((msg->flags & MIPI_DSI_MSG_LASTCOMMAND))
+	/*
+	 * In case of broadcast CMD length cannot be greater than 512 bytes
+	 * as specified by HW limitations. Need to overwrite the flags to
+	 * set the LAST_COMMAND flag to ensure no command transfer failures.
+	 */
+	if ((*flags & DSI_CTRL_CMD_FETCH_MEMORY) &&
+			(*flags & DSI_CTRL_CMD_BROADCAST)) {
+		if ((dsi_ctrl->cmd_len + length) > 240) {
+			dsi_ctrl_mask_overflow(dsi_ctrl, true);
+			*flags |= DSI_CTRL_CMD_LAST_COMMAND;
+			SDE_EVT32(dsi_ctrl->cell_index, SDE_EVTLOG_FUNC_CASE1,
+					flags);
+		}
+	}
+
+	if ((msg->flags & MIPI_DSI_MSG_LASTCOMMAND) ||
+			(*flags & DSI_CTRL_CMD_LAST_COMMAND))
 		packet.header[3] |= BIT(7);//set the last cmd bit in header.
 
 	if (*flags & DSI_CTRL_CMD_FETCH_MEMORY) {
@@ -1433,7 +1453,6 @@ static int dsi_message_tx(struct dsi_ctrl *dsi_ctrl,
 					rc);
 			goto error;
 		}
-	
 		/* Embedded mode config is selected */
 		cmd_mem.offset = dsi_ctrl->cmd_buffer_iova;
 		cmd_mem.en_broadcast = (*flags & DSI_CTRL_CMD_BROADCAST) ?
