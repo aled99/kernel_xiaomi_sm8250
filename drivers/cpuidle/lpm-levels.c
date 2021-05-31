@@ -62,6 +62,9 @@ static void cluster_prepare(struct lpm_cluster *cluster,
 static bool print_parsed_dt;
 module_param_named(print_parsed_dt, print_parsed_dt, bool, 0664);
 
+static bool sleep_disabled_dev;
+module_param_named(sleep_disabled_dev, sleep_disabled_dev, bool, 0664);
+
 /**
  * msm_cpuidle_get_deep_idle_latency - Get deep idle latency value
  *
@@ -82,6 +85,37 @@ uint32_t register_system_pm_ops(struct system_pm_ops *pm_ops)
 
 	return 0;
 }
+
+/**
+ * device type for disable lpm
+ *   type     event    bitmap
+ *   input      0x1      bit0
+ *  FrontCAM    0x2      bit1
+ **/
+#define EVENT_INPUT 0x1
+#define EVENT_FCAM  0x2
+#define EVENT_SUM   0x2
+static unsigned long lpm_dev_bitmp = 0;
+
+void lpm_disable_for_dev(bool on, char event_dev)
+{
+	unsigned long mask = BIT_MASK(event_dev);
+
+	if (event_dev > EVENT_SUM) {
+		pr_err("No support device %d disable lpm\n", event_dev);
+		return;
+	}
+
+	if (on) {
+		lpm_dev_bitmp |= mask;
+		sleep_disabled_dev = !!on;
+	} else {
+		lpm_dev_bitmp &= ~mask;
+		if (lpm_dev_bitmp == 0)
+			sleep_disabled_dev = !!on;
+	}
+}
+EXPORT_SYMBOL(lpm_disable_for_dev);
 
 static int lpm_dying_cpu(unsigned int cpu)
 {
