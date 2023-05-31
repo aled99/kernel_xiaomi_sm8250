@@ -692,8 +692,8 @@ POLLY_FLAGS	+= -mllvm -polly \
 		   -mllvm -polly-loopfusion-greedy=1 \
 		   -mllvm -polly-postopts=1 \
 		   -mllvm -polly-reschedule=1 \
-		   -mllvm -polly-omp-backend=LLVM \
-		   -mllvm -polly-scheduling-chunksize=1 
+		   -mllvm -polly-scheduling-chunksize=1 \
+		   -mllvm -polly-vectorizer=stripmine 
 # Polly may optimise loops with dead paths beyound what the linker
 # can understand. This may negate the effect of the linker's DCE
 # so we tell Polly to perfom proven DCE on the loops it optimises
@@ -701,8 +701,8 @@ POLLY_FLAGS	+= -mllvm -polly \
 OPT_FLAGS	+= $(POLLY_FLAGS)
 KBUILD_LDFLAGS	+= $(POLLY_FLAGS)
 endif
-KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -mtune=cortex-a55 -mcpu=cortex-a55 -fno-trapping-math -fno-math-errno --cuda-path=/dev/null -mfpu=crypto-neon-fp-armv8 
-KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -fno-trapping-math -fno-math-errno --cuda-path=/dev/null
+KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -mtune=cortex-a55 -mcpu=cortex-a55 
+KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod 
 KBUILD_LDFLAGS	+= -O3,-Bsymbolic-functions,--as-needed
 else
 KBUILD_CFLAGS   += -O2
@@ -711,20 +711,9 @@ KBUILD_LDFLAGS  += -O2
 endif
 
 ifdef CONFIG_INLINE_OPTIMIZATION
-ifdef CONFIG_CC_IS_CLANG
 KBUILD_CFLAGS	+= -mllvm -inline-threshold=2000
 KBUILD_CFLAGS	+= -mllvm -inlinehint-threshold=3000
 KBUILD_CFLAGS   += -mllvm -unroll-threshold=1200
-else ifdef CONFIG_CC_IS_GCC
-KBUILD_CFLAGS	+= --param max-inline-insns-single=600
-KBUILD_CFLAGS	+= --param max-inline-insns-auto=750
-
-# We limit inlining to 5KB on the stack.
-KBUILD_CFLAGS	+= --param large-stack-frame=12288
-
-KBUILD_CFLAGS	+= --param inline-min-speedup=5
-KBUILD_CFLAGS	+= --param inline-unit-growth=60
-endif
 endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
@@ -956,9 +945,6 @@ else
 CC_FLAGS_LTO	+= -flto
 endif
 CC_FLAGS_LTO	+= -fvisibility=hidden
-
-# Limit inlining across translation units to reduce binary size
-KBUILD_LDFLAGS += -mllvm -import-instr-limit=5
 
 # Check for frame size exceeding threshold during prolog/epilog insertion.
 ifneq ($(CONFIG_FRAME_WARN),0)
