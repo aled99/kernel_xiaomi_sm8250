@@ -683,31 +683,35 @@ ifeq ($(CONFIG_CC_OPTIMIZE_FOR_SIZE), y)
 KBUILD_CFLAGS   += -Os
 KBUILD_AFLAGS   += -Os
 KBUILD_LDFLAGS  += -Os
-else ifeq ($(cc-name),clang)
-KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -mllvm -polly --cuda-path=/dev/null
-KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod
-KBUILD_LDFLAGS  += -O3,-Bsymbolic-functions,--as-needed -mllvm -polly
-else
-KBUILD_CFLAGS   += -O2
-KBUILD_AFLAGS   += -O2
-KBUILD_LDFLAGS  += -O2
+endif
+ifdef CONFIG_POLLY_CLANG
+POLLY_FLAGS	+= -mllvm -polly \
+		   -mllvm -polly-run-inliner \
+		   -mllvm -polly-ast-use-context \
+		   -mllvm -polly-invariant-load-hoisting \
+		   -mllvm -polly-loopfusion-greedy=1 \
+		   -mllvm -polly-postopts=1 \
+		   -mllvm -polly-reschedule=1 \
+		   -mllvm -polly-scheduling-chunksize=1 \
+		   -mllvm -polly-vectorizer=stripmine 
+# Polly may optimise loops with dead paths beyound what the linker
+# can understand. This may negate the effect of the linker's DCE
+# so we tell Polly to perfom proven DCE on the loops it optimises
+# in order to preserve the overall effect of the linker's DCE.
+OPT_FLAGS	+= $(POLLY_FLAGS)
+KBUILD_LDFLAGS	+= $(POLLY_FLAGS)
+KBUILD_CFLAGS	+= $(POLLY_FLAGS)
+KBUILD_AFLAGS	+= $(POLLY_FLAGS)
+endif
+
+KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -mtune=cortex-a55 -mcpu=cortex-a55 --cuda-path=/dev/null
+KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -mcpu=cortex-a77
+KBUILD_LDFLAGS  += -O3,-Bsymbolic-functions,--as-needed -mllvm -mcpu=cortex-a77
 
 ifdef CONFIG_INLINE_OPTIMIZATION
-ifdef CONFIG_CC_IS_CLANG
-KBUILD_CFLAGS	+= -mllvm -inline-threshold=600
-KBUILD_CFLAGS	+= -mllvm -inlinehint-threshold=750
-else ifdef CONFIG_CC_IS_GCC
-KBUILD_CFLAGS	+= --param max-inline-insns-single=600
-KBUILD_CFLAGS	+= --param max-inline-insns-auto=750
-
-# We limit inlining to 5KB on the stack.
-KBUILD_CFLAGS	+= --param large-stack-frame=12288
-
-KBUILD_CFLAGS	+= --param inline-min-speedup=5
-KBUILD_CFLAGS	+= --param inline-unit-growth=60
-endif
-endif
-
+KBUILD_CFLAGS	+= -mllvm -inline-threshold=2000
+KBUILD_CFLAGS	+= -mllvm -inlinehint-threshold=3000
+KBUILD_CFLAGS   += -mllvm -unroll-threshold=1200
 endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
@@ -802,7 +806,7 @@ endif
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
 
 ifdef CONFIG_LTO_CLANG
-KBUILD_LDFLAGS += -O3 --lto-O3 --strip-debug
+KBUILD_LDFLAGS += -O3 --lto-O3 --strip-debug --plugin-opt=O3
 else
 KBUILD_LDFLAGS += -O3 --strip-debug
 endif
