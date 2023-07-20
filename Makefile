@@ -684,9 +684,9 @@ KBUILD_CFLAGS   += -Os
 KBUILD_AFLAGS   += -Os
 KBUILD_LDFLAGS  += -Os
 else ifeq ($(cc-name),clang)
-KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -fno-trapping-math -fno-math-errno -mllvm -polly --cuda-path=/dev/null
-KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod
-KBUILD_LDFLAGS  += -O3,-Bsymbolic-functions,--as-needed -mllvm -polly
+KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse -mtune=cortex-a77 -mcpu=cortex-a77 -fno-trapping-math -fno-math-errno -mllvm -polly -mllvm -polly-position=early -mllvm -polly-optimizer=isl -mllvm -polly-code-generation=full -mllvm -polly-vectorizer=stripmine -mllvm -polly-enable-delicm -mllvm -polly-enable-simplify -mllvm -polly-run-inliner --cuda-path=/dev/null -mfpu=crypto-neon-fp-armv8 
+KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse -fno-trapping-math -fno-math-errno -mllvm -polly -mllvm -polly-position=early -mllvm -polly-optimizer=isl -mllvm -polly-code-generation=full -mllvm -polly-vectorizer=stripmine -mllvm -polly-enable-delicm -mllvm -polly-enable-simplify -mllvm -polly-run-inliner --cuda-path=/dev/null
+KBUILD_LDFLAGS  += -O3,-Bsymbolic-functions,--as-needed -mllvm -polly -mllvm -polly-position=early -mllvm -polly-optimizer=isl -mllvm -polly-code-generation=full -mllvm -polly
 else
 KBUILD_CFLAGS   += -O2
 KBUILD_AFLAGS   += -O2
