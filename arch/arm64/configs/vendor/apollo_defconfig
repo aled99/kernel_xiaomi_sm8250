@@ -5783,6 +5783,10 @@ CONFIG_CRYPTO_HMAC=y
 CONFIG_CRYPTO_XCBC=y
 # CONFIG_CRYPTO_VMAC is not set
 
+
+# Initialize locals with zeroes
+CONFIG_INIT_STACK_ALL_ZERO=y
+
 #
 # Digest
 #
