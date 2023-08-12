@@ -51,6 +51,8 @@
 
 #define FPC1020_NAME "fpc1020"
 
+#define FPC1020_NAME "fpc1020"
+
 #define FPC_GPIO_NO_DEFAULT -1
 #define FPC_GPIO_NO_DEFINED -2
 #define FPC_GPIO_REQUEST_FAIL -3
@@ -122,11 +124,7 @@ struct fpc1020_data {
 
 	atomic_t wakeup_enabled; /* Used both in ISR and non-ISR */
 	int irqf;
-	struct notifier_block fb_notifier;
-	bool fb_black;
-	bool wait_finger_down;
-	struct work_struct work;
-	struct input_handler input_handler;
+        struct input_handler input_handler;
 };
 
 static int input_connect(struct input_handler *handler,
