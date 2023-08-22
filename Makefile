@@ -703,7 +703,7 @@ endif
 OPT_FLAGS	+= $(POLLY_FLAGS)
 KBUILD_LDFLAGS	+= $(POLLY_FLAGS)
 endif
-KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse -mtune=cortex-a77 -mcpu=cortex-a77 -fno-trapping-math -fno-math-errno --cuda-path=/dev/null -mfpu=crypto-neon-fp-armv8 
+KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse -mtune=cortex-a55 -mcpu=cortex-a55 -fno-trapping-math -fno-math-errno --cuda-path=/dev/null -mfpu=crypto-neon-fp-armv8 
 KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse -fno-trapping-math -fno-math-errno --cuda-path=/dev/null
 KBUILD_LDFLAGS  += -O3,-Bsymbolic-functions,--as-needed
 else
