@@ -1330,7 +1330,7 @@ static void affine_one_perf_irq(struct irq_desc *desc, unsigned int perf_flag)
 	if (perf_flag & IRQF_PERF_AFFINE) {
 		mask = cpu_perf_mask;
 		mask_index = &perf_cpu_index;
-	} else {
+	} else if (perf_flag & IRQF_PRIME_AFFINE) {
 		mask = cpu_prime_mask;
 		mask_index = &prime_cpu_index;
 	} else {
