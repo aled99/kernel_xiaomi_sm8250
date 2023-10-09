@@ -685,12 +685,15 @@ KBUILD_AFLAGS   += -Os
 KBUILD_LDFLAGS  += -Os
 else ifeq ($(cc-name),clang)
 ifdef CONFIG_POLLY_CLANG
-POLLY_FLAGS	+= -mllvm -polly \
+KBUILD_CFLAGS	+= -mllvm -polly \
+		   -mllvm -polly-run-dce \
+		   -mllvm -polly-run-inliner \
 		   -mllvm -polly-ast-use-context \
 		   -mllvm -polly-invariant-load-hoisting \
 		   -mllvm -polly-loopfusion-greedy=1 \
 		   -mllvm -polly-postopts=1 \
 		   -mllvm -polly-reschedule=1 \
+		   -mllvm -polly-detect-keep-going \
 		   -mllvm -polly-run-inliner \
 		   -mllvm -polly-vectorizer=stripmine
 # Polly may optimise loops with dead paths beyound what the linker
@@ -703,8 +706,8 @@ endif
 OPT_FLAGS	+= $(POLLY_FLAGS)
 KBUILD_LDFLAGS	+= $(POLLY_FLAGS)
 endif
-KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse -mtune=cortex-a55 -mcpu=cortex-a55 -fno-trapping-math -fno-math-errno --cuda-path=/dev/null -mfpu=crypto-neon-fp-armv8 
-KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse -fno-trapping-math -fno-math-errno --cuda-path=/dev/null
+KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -mtune=cortex-a55 -mcpu=cortex-a55 -fno-trapping-math -fno-math-errno --cuda-path=/dev/null -mfpu=crypto-neon-fp-armv8 
+KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -fno-trapping-math -fno-math-errno --cuda-path=/dev/null
 KBUILD_LDFLAGS  += -O3,-Bsymbolic-functions,--as-needed
 else
 KBUILD_CFLAGS   += -O2
