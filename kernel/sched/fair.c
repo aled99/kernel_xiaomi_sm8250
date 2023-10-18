@@ -7143,7 +7143,6 @@ enum fastpaths {
 	NONE = 0,
 	SYNC_WAKEUP,
 	PREV_CPU_FASTPATH,
-	MANY_WAKEUP,
 };
 
 static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
@@ -8029,6 +8028,11 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 	bool prefer_high_cap = boosted;
 #endif
 	int start_cpu = get_start_cpu(p, sync_boost);
+
+	if (is_many_wakeup(sibling_count_hint) && prev_cpu != cpu &&
+			cpumask_test_cpu(prev_cpu, &p->cpus_allowed))
+		return prev_cpu;
+
 	if (start_cpu < 0)
 		goto eas_not_ready;
 
@@ -8052,13 +8056,6 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 				bias_to_this_cpu(p, cpu, start_cpu)) {
 		best_energy_cpu = cpu;
 		fbt_env.fastpath = SYNC_WAKEUP;
-		goto done;
-	}
-
-	if (is_many_wakeup(sibling_count_hint) && prev_cpu != cpu &&
-				bias_to_this_cpu(p, prev_cpu, start_cpu)) {
-		best_energy_cpu = prev_cpu;
-		fbt_env.fastpath = MANY_WAKEUP;
 		goto done;
 	}
 
