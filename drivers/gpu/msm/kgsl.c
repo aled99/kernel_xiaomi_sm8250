@@ -5142,7 +5142,7 @@ int kgsl_request_irq(struct platform_device *pdev, const  char *name,
 		return num;
 
 	if (!strcmp(name, "kgsl_3d0_irq"))
-		irqflags |= IRQF_PERF_AFFINE;
+		irqflags |= IRQF_HP_AFFINE;
 
 	ret = devm_request_irq(&pdev->dev, num, handler, irqflags, name, data);
 
