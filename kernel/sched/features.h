@@ -13,7 +13,7 @@
  * wakeup-preemption), since its likely going to consume data we
  * touched, increases cache locality.
  */
-#define SCHED_FEAT_NEXT_BUDDY 0
+#define SCHED_FEAT_NEXT_BUDDY 1
 
 /*
  * Consider buddies to be cache hot, decreases the likeliness of a
@@ -33,13 +33,13 @@
 /*
  * Decrement CPU capacity based on time not spent running tasks
  */
-#define SCHED_FEAT_NONTASK_CAPACITY 1
+#define SCHED_FEAT_NONTASK_CAPACITY 0
 
 /*
  * Queue remote wakeups on the target CPU and process them
  * using the scheduler IPI. Reduces rq->lock contention/bounces.
  */
-#define SCHED_FEAT_TTWU_QUEUE 0
+#define SCHED_FEAT_TTWU_QUEUE 1
 
 /*
  * When doing wakeups, attempt to limit superfluous scans of the LLC domain.
