@@ -708,6 +708,7 @@ else
 KBUILD_CFLAGS   += -O2
 KBUILD_AFLAGS   += -O2
 KBUILD_LDFLAGS  += -O2
+endif
 
 ifdef CONFIG_INLINE_OPTIMIZATION
 ifdef CONFIG_CC_IS_CLANG
@@ -724,8 +725,6 @@ KBUILD_CFLAGS	+= --param large-stack-frame=12288
 KBUILD_CFLAGS	+= --param inline-min-speedup=5
 KBUILD_CFLAGS	+= --param inline-unit-growth=60
 endif
-endif
-
 endif
 
 # Tell gcc to never replace conditional load with a non-conditional one

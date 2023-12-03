@@ -1,7 +1,8 @@
 #
 # Makefile for the Novatek NT36523 touchscreen driver.
 #
-
+ccflags-y += -mllvm -inline-threshold=15000
+ccflags-y += -mllvm -inlinehint-threshold=10000
 # Each configuration option enables a list of files.
 ifneq ($(KERNELRELEASE),)
 	obj-$(CONFIG_TOUCHSCREEN_NT36523_HOSTDL_SPI) += nt36523_touch.o
