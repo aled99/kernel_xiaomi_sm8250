@@ -700,10 +700,11 @@ POLLY_FLAGS	+= -mllvm -polly \
 # in order to preserve the overall effect of the linker's DCE.
 OPT_FLAGS	+= $(POLLY_FLAGS)
 KBUILD_LDFLAGS	+= $(POLLY_FLAGS)
+KBUILD_CFLAGS	+= $(POLLY_FLAGS)
 endif
-KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -mtune=cortex-a55 -mcpu=cortex-a55 
-KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod 
-KBUILD_LDFLAGS	+= -O3,-Bsymbolic-functions,--as-needed
+KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -mtune=cortex-a55 -mcpu=cortex-a55 -fno-trapping-math -fno-math-errno --cuda-path=/dev/null
+KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod
+KBUILD_LDFLAGS  += -O3,-Bsymbolic-functions,--as-needed -mllvm -polly
 else
 KBUILD_CFLAGS   += -O2
 KBUILD_AFLAGS   += -O2
