@@ -683,7 +683,7 @@ ifeq ($(CONFIG_CC_OPTIMIZE_FOR_SIZE), y)
 KBUILD_CFLAGS   += -Os
 KBUILD_AFLAGS   += -Os
 KBUILD_LDFLAGS  += -Os
-else ifeq ($(cc-name),clang)
+endif
 ifdef CONFIG_POLLY_CLANG
 POLLY_FLAGS	+= -mllvm -polly \
 		   -mllvm -polly-run-inliner \
@@ -701,15 +701,12 @@ POLLY_FLAGS	+= -mllvm -polly \
 OPT_FLAGS	+= $(POLLY_FLAGS)
 KBUILD_LDFLAGS	+= $(POLLY_FLAGS)
 KBUILD_CFLAGS	+= $(POLLY_FLAGS)
+KBUILD_AFLAGS	+= $(POLLY_FLAGS)
 endif
+
 KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -mtune=cortex-a55 -mcpu=cortex-a55 --cuda-path=/dev/null
 KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod
 KBUILD_LDFLAGS  += -O3,-Bsymbolic-functions,--as-needed
-else
-KBUILD_CFLAGS   += -O2
-KBUILD_AFLAGS   += -O2
-KBUILD_LDFLAGS  += -O2
-endif
 
 ifdef CONFIG_INLINE_OPTIMIZATION
 KBUILD_CFLAGS	+= -mllvm -inline-threshold=2000
