@@ -768,8 +768,6 @@ static int msm_drm_init(struct device *dev, struct drm_driver *drv)
 	}
 #endif
 
-	msm_idle_init(ddev);
-
 	/* Bind all our sub-components: */
 	ret = msm_component_bind_all(dev, ddev);
 	if (ret)
