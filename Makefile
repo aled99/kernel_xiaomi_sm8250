@@ -688,12 +688,13 @@ ifdef CONFIG_POLLY_CLANG
 POLLY_FLAGS	+= -mllvm -polly \
 		   -mllvm -polly-run-inliner \
 		   -mllvm -polly-ast-use-context \
+		   -mllvm -polly-isl-arg=--no-schedule-serialize-sccs \
 		   -mllvm -polly-invariant-load-hoisting \
 		   -mllvm -polly-loopfusion-greedy=1 \
 		   -mllvm -polly-postopts=1 \
 		   -mllvm -polly-reschedule=1 \
-		   -mllvm -polly-scheduling-chunksize=1 \
-		   -mllvm -polly-vectorizer=stripmine 
+		   -mllvm -polly-omp-backend=LLVM \
+		   -mllvm -polly-scheduling-chunksize=1 
 # Polly may optimise loops with dead paths beyound what the linker
 # can understand. This may negate the effect of the linker's DCE
 # so we tell Polly to perfom proven DCE on the loops it optimises
@@ -704,9 +705,9 @@ KBUILD_CFLAGS	+= $(POLLY_FLAGS)
 KBUILD_AFLAGS	+= $(POLLY_FLAGS)
 endif
 
-KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -mtune=cortex-a55 -mcpu=cortex-a55 --cuda-path=/dev/null
+KBUILD_CFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -mtune=cortex-a77 -mcpu=cortex-a77 --cuda-path=/dev/null
 KBUILD_AFLAGS   += -O3 -march=armv8.2-a+lse+crypto+dotprod -mcpu=cortex-a77
-KBUILD_LDFLAGS  += -O3,-Bsymbolic-functions,--as-needed -mllvm -mcpu=cortex-a77
+KBUILD_LDFLAGS  += -O3,-mcpu=cortex-a77
 
 ifdef CONFIG_INLINE_OPTIMIZATION
 KBUILD_CFLAGS	+= -mllvm -inline-threshold=2000
