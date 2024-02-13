@@ -221,6 +221,7 @@
 				qcom,mdss-dsc-bit-per-component = <8>;
 				qcom,mdss-dsc-bit-per-pixel = <8>;
 				qcom,mdss-dsc-block-prediction-enable;
+<<<<<<< HEAD
 				
 				qcom,mdss-dsi-panel-phy-timings = [
 					00 21 08 08 25 22 09
@@ -230,6 +231,8 @@
 				/* 1xLM, 1xDSC Enc, 1xDSI Intf */
 				qcom,display-topology = <1 1 1>;
 				qcom,default-topology-index = <0>;
+=======
+>>>>>>> 22f3796e2269e (dts: vendor: Update from Immensity)
 			};
 		};
 	};
