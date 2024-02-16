@@ -552,7 +552,6 @@ static void _msm_drm_commit_work_cb(struct kthread_work *work)
 						 commit_work);
 	ktime_t start, end;
 	s64 duration;
-<<<<<<< HEAD
 	struct pm_qos_request req = {
 		.type = PM_QOS_REQ_AFFINE_CORES,
 		.cpus_affine = ATOMIC_INIT(BIT(raw_smp_processor_id()) |
@@ -560,9 +559,6 @@ static void _msm_drm_commit_work_cb(struct kthread_work *work)
 	};
         commit = container_of(work, struct msm_commit, commit_work);
         start = ktime_get();
-=======
-	start = ktime_get();
->>>>>>> 0f35d6b2314c4 (techpack: msm: Remove bogus NULL check in _msm_drm_commit_work_cb())
 	frame_stat_collector(0, COMMIT_START_TS);
 	pm_qos_add_request(&req, PM_QOS_CPU_DMA_LATENCY, 100);
 	SDE_ATRACE_BEGIN("complete_commit");
