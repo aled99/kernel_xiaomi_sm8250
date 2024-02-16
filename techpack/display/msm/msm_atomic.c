@@ -544,16 +544,22 @@ static void _msm_drm_commit_work_cb(struct kthread_work *work)
 {
 	struct msm_commit *commit = container_of(work, typeof(*commit),
 						 commit_work);
-	ktime_t start, end;
-	s64 duration;
 	struct pm_qos_request req = {
 		.type = PM_QOS_REQ_AFFINE_CORES,
 		.cpus_affine = ATOMIC_INIT(BIT(raw_smp_processor_id()) |
 					   *cpumask_bits(cpu_prime_mask))
 	};
-        commit = container_of(work, struct msm_commit, commit_work);
+        ktime_t start, end;
+        s64 duration;
         start = ktime_get();
-	frame_stat_collector(0, COMMIT_START_TS);
+        frame_stat_collector(0, COMMIT_START_TS);
+
+
+	/*
+	 * Optimistically assume the current task won't migrate to another CPU
+	 * and restrict the current CPU to shallow idle states so that it won't
+	 * take too long to resume after waiting for the prior commit to finish.
+	 */
 	pm_qos_add_request(&req, PM_QOS_CPU_DMA_LATENCY, 100);
 	SDE_ATRACE_BEGIN("complete_commit");
 	complete_commit(commit);
