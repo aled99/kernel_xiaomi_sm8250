@@ -381,36 +381,6 @@ free_skb:
 	kfree_skb(skb);
 }
 
-static void dfc_qmap_send_config(struct dfc_qmi_data *data)
-{
-	struct sk_buff *skb;
-	struct qmap_dfc_config *dfc_config;
-	unsigned int len = sizeof(struct qmap_dfc_config);
-
-	skb = alloc_skb(len, GFP_ATOMIC);
-	if (!skb)
-		return;
-
-	skb->protocol = htons(ETH_P_MAP);
-	dfc_config = (struct qmap_dfc_config *)skb_put(skb, len);
-	memset(dfc_config, 0, len);
-
-	dfc_config->hdr.cd_bit = 1;
-	dfc_config->hdr.mux_id = 0;
-	dfc_config->hdr.pkt_len = htons(len - QMAP_HDR_LEN);
-	dfc_config->hdr.cmd_name = QMAP_DFC_CONFIG;
-	dfc_config->hdr.cmd_type = QMAP_CMD_REQUEST;
-	dfc_config->hdr.tx_id = htonl(atomic_inc_return(&qmap_txid));
-
-	dfc_config->cmd_ver = QMAP_DFC_VER;
-	dfc_config->cmd_id = QMAP_DFC_IND;
-	dfc_config->tx_info = 1;
-	dfc_config->ep_type = htonl(data->svc.ep_type);
-	dfc_config->iface_id = htonl(data->svc.iface_id);
-
-	dfc_qmap_send_cmd(skb);
-}
-
 static void dfc_qmap_send_query(u8 mux_id, u8 bearer_id)
 {
 	struct sk_buff *skb;
@@ -578,9 +548,6 @@ int dfc_qmap_client_init(void *port, int index, struct svc_info *psvc,
 				  data->svc.ep_type, data->svc.iface_id);
 
 	pr_info("DFC QMAP init\n");
-
-	if (!qmi->ps_ext)
-		dfc_qmap_send_config(data);
 
 	return 0;
 }

@@ -407,13 +407,6 @@ PYTHON2		= python2
 PYTHON3		= python3
 CHECK		= sparse
 
-<<<<<<< HEAD
-=======
-# Use the wrapper for the compiler.  This wrapper scans for new
-# warnings and causes the build to stop upon encountering them
-CC		= $(PYTHON2) $(srctree)/scripts/gcc-wrapper.py $(REAL_CC)
-
->>>>>>> c3cdbb0b821338b84aec266bf71d1e28ad520e54
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void -Wno-unknown-attribute $(CF)
 NOSTDINC_FLAGS  =
@@ -810,15 +803,12 @@ endif
 # These warnings generated too much noise in a regular build.
 # Use make W=1 to enable them (see scripts/Makefile.extrawarn)
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
-<<<<<<< HEAD
 
 ifdef CONFIG_LTO_CLANG
 KBUILD_LDFLAGS += -O3 --lto-O3 --strip-debug --plugin-opt=O3
 else
 KBUILD_LDFLAGS += -O3 --strip-debug
 endif
-=======
->>>>>>> c3cdbb0b821338b84aec266bf71d1e28ad520e54
 
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-const-variable)
 ifdef CONFIG_FRAME_POINTER

@@ -618,7 +618,6 @@ qmi_rmnet_setup_client(void *port, struct qmi_info *qmi, struct tcmsg *tcm)
 	}
 
 	qmi->flag = tcm->tcm_ifindex;
-	qmi->ps_ext = FLAG_TO_PS_EXT(qmi->flag);
 	svc.instance = tcm->tcm_handle;
 	svc.ep_type = tcm->tcm_info;
 	svc.iface_id = tcm->tcm_parent;
@@ -1116,7 +1115,6 @@ static struct rmnet_powersave_work *rmnet_work;
 static bool rmnet_work_quit;
 static bool rmnet_work_inited;
 static LIST_HEAD(ps_list);
-static u8 ps_bearer_id[32];
 
 struct rmnet_powersave_work {
 	struct delayed_work work;
@@ -1283,78 +1281,6 @@ end:
 	rcu_read_lock();
 	if (!rmnet_work_quit)
 		queue_delayed_work(rmnet_ps_wq, &real_work->work, PS_INTERVAL);
-	rcu_read_unlock();
-}
-
-static void qmi_rmnet_check_stats_2(struct work_struct *work)
-{
-	struct rmnet_powersave_work *real_work;
-	struct qmi_info *qmi;
-	u64 rxd, txd;
-	u64 rx, tx;
-	u8 num_bearers;
-
-	real_work = container_of(to_delayed_work(work),
-				 struct rmnet_powersave_work, work);
-
-	if (unlikely(!real_work->port))
-		return;
-
-	qmi = (struct qmi_info *)rmnet_get_qmi_pt(real_work->port);
-	if (unlikely(!qmi))
-		return;
-
-	if (qmi->ps_enabled) {
-
-		/* Ready to accept grant */
-		qmi->ps_ignore_grant = false;
-
-		/* Out of powersave */
-		if (dfc_qmap_set_powersave(0, 0, NULL))
-			goto end;
-
-		qmi->ps_enabled = false;
-
-		if (rmnet_get_powersave_notif(real_work->port))
-			qmi_rmnet_ps_off_notify(real_work->port);
-
-		goto end;
-	}
-
-	rmnet_get_packets(real_work->port, &rx, &tx);
-	rxd = rx - real_work->old_rx_pkts;
-	txd = tx - real_work->old_tx_pkts;
-	real_work->old_rx_pkts = rx;
-	real_work->old_tx_pkts = tx;
-
-	if (!rxd && !txd) {
-		qmi->ps_ignore_grant = true;
-		qmi->ps_enabled = true;
-		clear_bit(PS_WORK_ACTIVE_BIT, &qmi->ps_work_active);
-
-		/* Let other CPU's see this update so that packets are
-		 * dropped, instead of further processing packets
-		 */
-		smp_mb();
-
-		num_bearers = sizeof(ps_bearer_id);
-		memset(ps_bearer_id, 0, sizeof(ps_bearer_id));
-		rmnet_prepare_ps_bearers(real_work->port, &num_bearers,
-					 ps_bearer_id);
-
-		/* Enter powersave */
-		dfc_qmap_set_powersave(1, num_bearers, ps_bearer_id);
-
-		if (rmnet_get_powersave_notif(real_work->port))
-			qmi_rmnet_ps_on_notify(real_work->port);
-
-		return;
-	}
-end:
-	rcu_read_lock();
-	if (!rmnet_work_quit)
-		alarm_start_relative(&real_work->atimer, PS_INTERVAL_KT);
-
 	rcu_read_unlock();
 }
 

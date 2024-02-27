@@ -1156,8 +1156,8 @@ msm_get_subset_parts(struct device *dev,
 static uint32_t
 socinfo_get_defective_parts(void)
 {
-	uint32_t num_parts = socinfo_get_num_defective_parts();
-	uint32_t offset = socinfo_get_ndefective_parts_array_offset();
+	uint32_t num_parts = socinfo_get_num_subset_parts();
+	uint32_t offset = socinfo_get_nsubset_parts_array_offset();
 	uint32_t def_parts = 0;
 	void *info = socinfo;
 	uint32_t part_entry;
@@ -1176,26 +1176,6 @@ socinfo_get_defective_parts(void)
 
 	return def_parts;
 }
-
-bool
-socinfo_get_part_info(enum defective_part_type part)
-{
-	uint32_t partinfo;
-
-	if (part >= NUM_PARTS_MAX) {
-		pr_err("Bad part number\n");
-		return false;
-	}
-
-	partinfo = socinfo_get_defective_parts();
-	if (partinfo < 0) {
-		pr_err("Failed to get part information\n");
-		return false;
-	}
-
-	return (partinfo & BIT(part));
-}
-EXPORT_SYMBOL(socinfo_get_part_info);
 
 static ssize_t
 msm_get_defective_parts(struct device *dev,
@@ -1554,10 +1534,6 @@ static struct device_attribute msm_soc_attr_nsubset_parts_array_offset =
 static struct device_attribute msm_soc_attr_subset_parts =
 	__ATTR(subset_parts, 0444,
 			msm_get_subset_parts, NULL);
-
-static struct device_attribute msm_soc_attr_defective_parts =
-	__ATTR(defective_parts, 0444,
-			msm_get_defective_parts, NULL);
 
 static struct device_attribute msm_soc_attr_nmodem_supported =
 	__ATTR(nmodem_supported, 0444,
