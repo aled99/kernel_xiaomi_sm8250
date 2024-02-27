@@ -65,11 +65,7 @@ static ssize_t synx_table_read(struct file *file,
 	for (i = 1; i < SYNX_MAX_OBJS; i++) {
 		row = &dev->synx_table[i];
 
-		index = row->index;
-		mutex_lock(&dev->row_locks[index]);
-		if (!row->index) {
-			mutex_unlock(&dev->row_locks[index]);
-			pr_debug("synx obj at %d invalid\n", index);
+		if (!row->index)
 			continue;
 
 		mutex_lock(&dev->row_locks[row->index]);
