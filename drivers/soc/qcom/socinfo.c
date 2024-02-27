@@ -696,6 +696,22 @@ static uint32_t socinfo_get_ncluster_array_offset(void)
 		: 0;
 }
 
+static uint32_t socinfo_get_nsubset_parts_array_offset(void)
+{
+	return socinfo ?
+		(socinfo_format >= SOCINFO_VERSION(0, 14) ?
+			socinfo->v0_14.nsubset_parts_array_offset : 0)
+		: 0;
+}
+
+static uint32_t socinfo_get_num_subset_parts(void)
+{
+	return socinfo ?
+		(socinfo_format >= SOCINFO_VERSION(0, 14) ?
+			socinfo->v0_14.num_subset_parts : 0)
+		: 0;
+}
+
 static uint32_t socinfo_get_num_defective_parts(void)
 {
 	return socinfo ?
