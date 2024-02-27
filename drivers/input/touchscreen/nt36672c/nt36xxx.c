@@ -31,6 +31,7 @@
 #include <linux/debugfs.h>
 #include <linux/spi-xiaomi-tp.h>
 #include <drm/drm_notifier_mi.h>
+#include <uapi/linux/sched/types.h>
 
 #include <linux/notifier.h>
 #include <linux/fb.h>
@@ -1451,6 +1452,14 @@ static irqreturn_t nvt_ts_work_func(int irq, void *data)
 #endif /* MT_PROTOCOL_B */
 	int32_t i = 0;
 	int32_t finger_cnt = 0;
+	
+	static struct task_struct *touch_task = NULL;
+	struct sched_param par = { .sched_priority = MAX_RT_PRIO / 2};
+
+	if (touch_task == NULL) {
+		touch_task = current;
+		sched_setscheduler_nocheck(touch_task, SCHED_FIFO, &par);
+	}
 
 #if WAKEUP_GESTURE
 	if (bTouchIsAwake == 0) {
