@@ -1755,27 +1755,6 @@ static void android_service_blacklist(const char *name)
 	}
 }
 
-static noinline bool is_lmkd_reinit(struct user_arg_ptr *argv)
-{
-	const char __user *str;
-	char buf[10];
-	int len;
-
-	str = get_user_arg_ptr(*argv, 1);
-	if (IS_ERR(str))
-		return false;
-
-	// strnlen_user() counts NULL terminator
-	len = strnlen_user(str, MAX_ARG_STRLEN);
-	if (len != 9)
-		return false;
-
-	if (copy_from_user(buf, str, len))
-		return false;
-
-	return !strcmp(buf, "--reinit");
-}
-
 /*
  * sys_execve() executes a new program.
  */
@@ -1859,11 +1838,11 @@ static int __do_execve_file(int fd, struct filename *filename,
 	if (retval)
 		goto out_unmark;
 
-	bprm->argc = count(argv, MAX_ARG_STRINGS);
-	if (bprm->argc == 0)
+	bprm.argc = count(argv, MAX_ARG_STRINGS);
+	if (bprm.argc == 0)
 		pr_warn_once("process '%s' launched '%s' with NULL argv: empty string added\n",
-			     current->comm, bprm->filename);
-	if ((retval = bprm->argc) < 0)
+			     current->comm, bprm.filename);
+	if ((retval = bprm.argc) < 0)
 		goto out;
 
 	bprm.envc = count(envp, MAX_ARG_STRINGS);
@@ -1893,15 +1872,15 @@ static int __do_execve_file(int fd, struct filename *filename,
 	 * from argv[1] won't end up walking envp. See also
 	 * bprm_stack_limits().
 	 */
-	if (bprm->argc == 0) {
+	if (bprm.argc == 0) {
 		const char *argv[] = { "", NULL };
-		retval = copy_strings_kernel(1, argv, bprm);
+		retval = copy_strings_kernel(1, argv, &bprm);
 		if (retval < 0)
 			goto out;
-		bprm->argc = 1;
+		bprm.argc = 1;
 	}
 
-	retval = exec_binprm(bprm);
+	retval = exec_binprm(&bprm);
 	if (retval < 0)
 		goto out;
 
