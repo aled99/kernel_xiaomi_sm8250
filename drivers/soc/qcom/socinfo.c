@@ -1178,16 +1178,6 @@ socinfo_get_defective_parts(void)
 }
 
 static ssize_t
-msm_get_defective_parts(struct device *dev,
-		struct device_attribute *attr,
-		char *buf)
-{
-	uint32_t def_parts = socinfo_get_defective_parts();
-
-	return scnprintf(buf, PAGE_SIZE, "%x\n", def_parts);
-}
-
-static ssize_t
 msm_get_nmodem_supported(struct device *dev,
 			struct device_attribute *attr,
 			char *buf)
