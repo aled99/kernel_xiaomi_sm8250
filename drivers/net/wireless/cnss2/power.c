@@ -77,9 +77,6 @@ static int cnss_get_vreg_single(struct cnss_plat_data *plat_priv,
 		else if (ret == -EPROBE_DEFER)
 			cnss_pr_info("EPROBE_DEFER for regulator: %s\n",
 				     vreg->cfg.name);
-		else
-			cnss_pr_err("Failed to get regulator %s, err = %d\n",
-				    vreg->cfg.name, ret);
 		return ret;
 	}
 
@@ -461,9 +458,6 @@ static int cnss_get_clk_single(struct cnss_plat_data *plat_priv,
 		ret = PTR_ERR(clk);
 		if (clk_info->cfg.required)
 			cnss_pr_err("Failed to get clock %s, err = %d\n",
-				    clk_info->cfg.name, ret);
-		else
-			cnss_pr_dbg("Failed to get optional clock %s, err = %d\n",
 				    clk_info->cfg.name, ret);
 		return ret;
 	}
