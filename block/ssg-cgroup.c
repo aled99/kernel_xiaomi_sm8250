@@ -75,11 +75,12 @@ static void ssg_blkcg_set_shallow_depth(struct ssg_blkcg *ssg_blkcg,
 		max_t(unsigned int, 1, ssg_blkg->max_available_rqs / map_nr);
 }
 
-static struct blkg_policy_data *ssg_blkcg_pd_alloc(gfp_t gfp, int node)
+static struct blkg_policy_data *ssg_blkcg_pd_alloc(gfp_t gfp,
+		struct request_queue *q, struct blkcg *blkcg)
 {
 	struct ssg_blkg *ssg_blkg;
 
-	ssg_blkg = kzalloc_node(sizeof(struct ssg_blkg), gfp, node);
+	ssg_blkg = kzalloc_node(sizeof(struct ssg_blkg), gfp, q->node);
 	if (ZERO_OR_NULL_PTR(ssg_blkg))
 		return NULL;
 

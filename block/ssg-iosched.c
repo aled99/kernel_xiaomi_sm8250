@@ -444,7 +444,7 @@ static struct request *ssg_dispatch_request(struct blk_mq_hw_ctx *hctx)
 	return rq;
 }
 
-static void ssg_completed_request(struct request *rq)
+static void ssg_completed_request(struct request *rq, u64 now)
 {
 	struct ssg_data *ssg = rq->q->elevator->elevator_data;
 	struct ssg_request_info *rqi;
@@ -648,15 +648,15 @@ static int ssg_request_merge(struct request_queue *q, struct request **rq,
 	return ELEVATOR_NO_MERGE;
 }
 
-static bool ssg_bio_merge(struct blk_mq_hw_ctx *hctx,struct bio *bio)
+static bool ssg_bio_merge(struct request_queue *q, struct bio *bio,
+		unsigned int nr_segs)
 {
-	struct request_queue *q = hctx->queue;
 	struct ssg_data *ssg = q->elevator->elevator_data;
 	struct request *free = NULL;
 	bool ret;
 
 	spin_lock(&ssg->lock);
-	ret = blk_mq_sched_try_merge(q, bio, &free);
+	ret = blk_mq_sched_try_merge(q, bio, nr_segs, &free);
 	spin_unlock(&ssg->lock);
 
 	if (free)
@@ -769,7 +769,6 @@ static void ssg_finish_request(struct request *rq)
 	struct request_queue *q = rq->q;
 	struct ssg_data *ssg = q->elevator->elevator_data;
 	struct ssg_request_info *rqi;
-	struct blk_mq_hw_ctx *hctx;
 
 	if (blk_queue_is_zoned(q)) {
 		unsigned long flags;
@@ -777,8 +776,7 @@ static void ssg_finish_request(struct request *rq)
 		spin_lock_irqsave(&ssg->zone_lock, flags);
 		blk_req_zone_write_unlock(rq);
 		if (!list_empty(&ssg->fifo_list[WRITE]))
-			hctx = blk_mq_map_queue(q, rq->mq_ctx->cpu);
-			blk_mq_sched_mark_restart_hctx(hctx);
+			blk_mq_sched_mark_restart_hctx(rq->mq_hctx);
 		spin_unlock_irqrestore(&ssg->zone_lock, flags);
 	}
 
@@ -987,7 +985,7 @@ static const struct blk_mq_debugfs_attr ssg_queue_debugfs_attrs[] = {
 #endif
 
 static struct elevator_type ssg_iosched = {
-	.ops.mq = {
+	.ops = {
 		.insert_requests = ssg_insert_requests,
 		.dispatch_request = ssg_dispatch_request,
 		.completed_request = ssg_completed_request,
@@ -1010,10 +1008,10 @@ static struct elevator_type ssg_iosched = {
 #ifdef CONFIG_BLK_DEBUG_FS
 	.queue_debugfs_attrs = ssg_queue_debugfs_attrs,
 #endif
-	.uses_mq = true,
 	.elevator_attrs = ssg_attrs,
 	.elevator_name = "ssg",
 	.elevator_alias = "ssg",
+	.elevator_features = ELEVATOR_F_ZBD_SEQ_WRITE,
 	.elevator_owner = THIS_MODULE,
 };
 MODULE_ALIAS("ssg");
