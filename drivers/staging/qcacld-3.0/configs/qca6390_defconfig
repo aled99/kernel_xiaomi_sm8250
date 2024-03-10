@@ -110,7 +110,7 @@ ifneq ($(CONFIG_MOBILE_ROUTER), y)
 #Flag to enable TDLS feature
 CONFIG_QCOM_TDLS := y
 
-CONFIG_WLAN_SYSFS := y
+CONFIG_WLAN_SYSFS := n
 endif
 
 CONFIG_QCACLD_FEATURE_GREEN_AP := y
@@ -211,7 +211,7 @@ ifeq ($(CONFIG_ROME_IF),usb)
 endif
 
 
-CONFIG_FEATURE_EPPING := y
+CONFIG_FEATURE_EPPING := n
 
 #Flag to enable offload packets feature
 CONFIG_WLAN_OFFLOAD_PACKETS := y
@@ -293,7 +293,7 @@ ifeq ($(CONFIG_ICNSS), y)
 CONFIG_WIFI_3_0_ADRASTEA := y
 CONFIG_ADRASTEA_RRI_ON_DDR := y
 # Enable athdiag procfs debug support for adrastea
-CONFIG_ATH_PROCFS_DIAG_SUPPORT := y
+CONFIG_ATH_PROCFS_DIAG_SUPPORT := n
 # Enable 11AC TX compact feature for adrastea
 CONFIG_ATH_11AC_TXCOMPACT := y
 ifeq ($(CONFIG_QMI_SUPPORT), y)
@@ -369,13 +369,13 @@ ifneq ($(TARGET_BUILD_VARIANT),user)
 endif
 
 #Enable WLAN/Power debugfs feature only if debug_fs is enabled
-ifeq ($(CONFIG_DEBUG_FS), y)
+#ifeq ($(CONFIG_DEBUG_FS), y)
        # Flag to enable debugfs. Depends on CONFIG_DEBUG_FS in kernel
        # configuration.
-       CONFIG_WLAN_DEBUGFS := y
+       #CONFIG_WLAN_DEBUGFS := y
 
-       CONFIG_WLAN_POWER_DEBUGFS := y
-endif
+       #CONFIG_WLAN_POWER_DEBUGFS := y
+#endif
 
 # Feature flags which are not (currently) configurable via Kconfig
 
@@ -563,7 +563,7 @@ CONFIG_QCA_SIGNED_SPLIT_BINARY_SUPPORT := n
 CONFIG_QCA_SINGLE_BINARY_SUPPORT := n
 
 #Enable collecting target RAM dump after kernel panic
-CONFIG_TARGET_RAMDUMP_AFTER_KERNEL_PANIC := y
+CONFIG_TARGET_RAMDUMP_AFTER_KERNEL_PANIC := n
 
 #Flag to enable/disable secure firmware feature
 CONFIG_FEATURE_SECURE_FIRMWARE := n
@@ -588,7 +588,7 @@ CONFIG_WLAN_DFS_MASTER_ENABLE := y
 CONFIG_WLAN_WEXT_SUPPORT_ENABLE := y
 
 #Flag to enable nud tracking feature
-CONFIG_WLAN_NUD_TRACKING := y
+CONFIG_WLAN_NUD_TRACKING := n
 
 #Flag to enable wbuff feature
 CONFIG_WLAN_WBUFF := y
@@ -721,12 +721,12 @@ endif
 
 ifneq ($(CONFIG_HIF_USB), y)
 ifeq ($(BUILD_DEBUG_VERSION), 1)
-CONFIG_WLAN_LOGGING_SOCK_SVC := y
+CONFIG_WLAN_LOGGING_SOCK_SVC := n
 endif
 endif
 
 ifneq ($(TARGET_BUILD_VARIANT),user)
-CONFIG_DESC_DUP_DETECT_DEBUG := y
+CONFIG_DESC_DUP_DETECT_DEBUG := n
 CONFIG_DEBUG_RX_RING_BUFFER := y
 endif
 
@@ -759,7 +759,7 @@ CONFIG_SM_ENG_HIST := n
 
 ifeq ($(CONFIG_WLAN_SYSFS), y)
 #Enable Beacon Reception Stats
-CONFIG_FEATURE_BECN_STATS := y
+CONFIG_FEATURE_BECN_STATS := n
 endif
 
 ifeq (y,$(findstring y,$(CONFIG_ARCH_MSM) $(CONFIG_ARCH_QCOM)))
@@ -774,8 +774,8 @@ CONFIG_SAP_DHCP_FW_IND := y
 CONFIG_WLAN_FW_OFFLOAD := y
 
 #Enable Desc Debug Check
-CONFIG_RX_DESC_DEBUG_CHECK := y
+CONFIG_RX_DESC_DEBUG_CHECK := n
 
 #Enable Power Debug
-CONFIG_WLAN_POWER_DEBUG := y
+CONFIG_WLAN_POWER_DEBUG := n
 
