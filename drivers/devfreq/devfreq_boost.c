@@ -11,7 +11,6 @@
 #include <drm/drm_notifier_mi.h>
 #include <linux/slab.h>
 #include <uapi/linux/sched/types.h>
-#include <drm/drm_panel.h>
 
 enum {
 	SCREEN_OFF,
@@ -143,7 +142,7 @@ static void devfreq_update_boosts(struct boost_dev *b, unsigned long state)
 	struct devfreq *df = b->df;
 
 	mutex_lock(&df->lock);
-	if (!(state & BIT(SCREEN_OFF))) {
+	if (state & BIT(SCREEN_OFF)) {
 		df->min_freq = df->profile->freq_table[0];
 		df->max_boost = false;
 	} else {
@@ -297,8 +296,6 @@ static struct input_handler devfreq_boost_input_handler = {
 	.id_table	= devfreq_boost_ids
 };
 
-extern struct drm_panel *lcd_active_panel;
-
 static int __init devfreq_boost_init(void)
 {
 	struct df_boost_drv *d = &df_boost_drv_g;
@@ -308,8 +305,8 @@ static int __init devfreq_boost_init(void)
 	for (i = 0; i < DEVFREQ_MAX; i++) {
 		struct boost_dev *b = &d->devices[i];
 
-		thread[i] = kthread_run_perf_critical(cpu_hp_mask, devfreq_boost_thread,
-						      b, "devfreq_boostd/%d", i);
+		thread[i] = kthread_run_perf_critical(cpu_hp_mask, devfreq_boost_thread, b,
+					"devfreq_boostd/%d", i);
 		if (IS_ERR(thread[i])) {
 			ret = PTR_ERR(thread[i]);
 			pr_err("Failed to create kthread, err: %d\n", ret);
@@ -328,9 +325,10 @@ static int __init devfreq_boost_init(void)
 	d->msm_drm_notif.priority = INT_MAX;
 	ret = mi_drm_register_client(&d->msm_drm_notif);
 	if (ret) {
-		pr_err("Failed to register fb notifier, err: %d\n", ret);
+		pr_err("Failed to register msm_drm notifier, err: %d\n", ret);
 		goto unregister_handler;
 	}
+
 	return 0;
 
 unregister_handler:
