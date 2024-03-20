@@ -25,7 +25,7 @@
 
 		opp-350000000 {
 			opp-hz = /bits/ 64 <350000000>;
-			opp-microvolt = <RPMH_REGULATOR_LEVEL_MIN_SVS>;
+			opp-microvolt = <RPMH_REGULATOR_LEVEL_LOW_SVS_D1>;
 		};
 		
 		opp-150000000 {
@@ -117,11 +117,11 @@
 				reg = <4>;
 				qcom,gpu-freq = <150000000>;
 				qcom,bus-freq-ddr7 = <3>;
-				qcom,bus-min-ddr7 = <2>;
+				qcom,bus-min-ddr7 = <1>;
 				qcom,bus-max-ddr7 = <5>;
 
 				qcom,bus-freq-ddr8 = <3>;
-				qcom,bus-min-ddr8 = <2>;
+				qcom,bus-min-ddr8 = <1>;
 				qcom,bus-max-ddr8 = <5>;
 
 				qcom,acd-level = <0x802b5ffd>;
